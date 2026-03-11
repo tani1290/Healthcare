@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card p-4">
+            <div class="d-flex justify-content-between">
+                <h2>Appointment Details</h2>
+                <span class="badge bg-{{ 'success' if appointment.status == 'completed' else 'warning' }} fs-6">
+                    {{ appointment.status|upper }}
+                </span>
+            </div>
+
+            <hr>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Patient Info</h5>
+                    <p><strong>Name:</strong> {{ appointment.patient.name }}</p>
+                    <p><strong>Age:</strong>
+                        {% if appointment.patient.dob %}
+                        {{ ((now().date() - appointment.patient.dob).days / 365)|int }}
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </p>
+                    <p><strong>Gender:</strong> {{ appointment.patient.gender }}</p>
+                    <a href="{{ url_for('doctor.view_patient_history', patient_id=appointment.patient.id) }}"
+                        class="btn btn-sm btn-info text-white mt-2">View Medical History</a>
+                </div>
+                <div class="col-md-6">
+                    <h5>Slot Info</h5>
+                    <p><strong>Date:</strong> {{ appointment.slot.start_time.strftime('%d %b %Y') }}</p>
+                    <p><strong>Time:</strong> {{ appointment.slot.start_time.strftime('%H:%M') }}</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>Symptoms / Reason</h5>
+                <p>{{ appointment.symptoms }}</p>
+            </div>
+
+            <hr>
+
+            {% if appointment.prescription %}
+            <div class="alert alert-success">
+                <h4>Prescription Given</h4>
+                <p><strong>Medicines:</strong></p>
+                <ul>
+                    {% for item in appointment.prescription.items %}
+                    <li>{{ item.medicine }} ({{ item.dosage }}, {{ item.frequency }}, <strong>{{ item.timing
+                            }}</strong>) - {{ item.duration }}</li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Instructions:</strong> {{ appointment.prescription.instructions }}</p>
+                <hr>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('doctor.edit_prescription', id=appointment.prescription.id) }}"
+                        class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{{ url_for('doctor.delete_prescription', id=appointment.prescription.id) }}"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('Delete prescription? This cannot be undone.')">Delete</a>
+                </div>
+            </div>
+            {% else %}
+            <h4>Write Prescription</h4>
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Medicines</label>
+                    <table class="table table-bordered" id="rx-table">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Dosage</th>
+                                <th>Frequency</th>
+                                <th>Timing</th>
+                                <th>Duration</th>
+                                <th>Qty</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" name="medicines[]" class="form-control" placeholder="Name"
+                                        required></td>
+                                <td><input type="text" name="dosages[]" class="form-control" placeholder="500mg"></td>
+                                <td><input type="text" name="frequencies[]" class="form-control" placeholder="1-0-1">
+                                </td>
+                                <td>
+                                    <select name="timings[]" class="form-select">
+                                        <option value="After Food">After Food</option>
+                                        <option value="Before Food">Before Food</option>
+                                        <option value="With Food">With Food</option>
+                                        <option value="Empty Stomach">Empty Stomach</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" name="durations[]" class="form-control" placeholder="5 days">
+                                </td>
+                                <td><input type="number" name="quantities[]" class="form-control" placeholder="10"></td>
+                                <td><button type="button" class="btn btn-danger btn-sm remove-row">X</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-success btn-sm" id="add-row">Add Medicine</button>
+                </div>
+                <div class="mb-3">
+                    <label>Instructions / Advice</label>
+                    <textarea name="instructions" class="form-control" rows="3" placeholder="Drink plenty of water..."
+                        required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Prescription & Complete</button>
+            </form>
+
+            <script>
+                document.getElementById('add-row').addEventListener('click', function () {
+                    var table = document.getElementById('rx-table').getElementsByTagName('tbody')[0];
+                    var row = table.insertRow(-1);
+                    row.innerHTML = `
+                        <td><input type="text" name="medicines[]" class="form-control" required></td>
+                        <td><input type="text" name="dosages[]" class="form-control"></td>
+                        <td><input type="text" name="frequencies[]" class="form-control"></td>
+                        <td>
+                            <select name="timings[]" class="form-select">
+                                <option value="After Food">After Food</option>
+                                <option value="Before Food">Before Food</option>
+                                <option value="With Food">With Food</option>
+                                <option value="Empty Stomach">Empty Stomach</option>
+                            </select>
+                        </td>
+                        <td><input type="text" name="durations[]" class="form-control"></td>
+                        <td><input type="number" name="quantities[]" class="form-control"></td>
+                        <td><button type="button" class="btn btn-danger btn-sm remove-row">X</button></td>
+                    `;
+                    attachRemoveEvent();
+                });
+
+                function attachRemoveEvent() {
+                    var buttons = document.getElementsByClassName('remove-row');
+                    for (var i = 0; i < buttons.length; i++) {
+                        buttons[i].addEventListener('click', function () {
+                            if (document.querySelectorAll('#rx-table tbody tr').length > 1) {
+                                this.closest('tr').remove();
+                            }
+                        });
+                    }
+                }
+                attachRemoveEvent();
+            </script>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

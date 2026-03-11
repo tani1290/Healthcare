@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h2>Edit Slot</h2>
+            <form method="post">
+                <div class="mb-3">
+                    <label>Date & Start Time</label>
+                    <input type="datetime-local" name="start_time" class="form-control"
+                        value="{{ slot.start_time.strftime('%Y-%m-%dT%H:%M') }}" required>
+                </div>
+                <div class="mb-3">
+                    <label>Duration (minutes)</label>
+                    <input type="number" name="duration" class="form-control"
+                        value="{{ ((slot.end_time - slot.start_time).seconds / 60)|int }}" required>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('doctor.manage_slots') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update Slot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

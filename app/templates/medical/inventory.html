@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>💊 Pharmacy Inventory</h2>
+            <a href="{{ url_for('medical.dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+        </div>
+
+        <div class="card p-4 mb-4">
+            <h5>Add New Stock</h5>
+            <form action="{{ url_for('medical.inventory') }}" method="POST" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Medicine Name</label>
+                    <input type="text" name="name" class="form-control" required placeholder="e.g. Paracetamol">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Stock Qty</label>
+                    <input type="number" name="stock" class="form-control" required placeholder="100">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Price per Unit (₹)</label>
+                    <input type="number" step="0.01" name="price" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Expiry Date</label>
+                    <input type="date" name="expiry" class="form-control">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Add Stock</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Current Stock</div>
+            <div class="card-body">
+                {% if items %}
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Expiry</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td><strong>{{ item.medicine_name }}</strong></td>
+                            <td>
+                                {{ item.stock }}
+                                {% if item.stock < 10 %} <span class="badge bg-danger">Low</span>
+                                    {% endif %}
+                            </td>
+                            <td>₹{{ item.price }}</td>
+                            <td>{{ item.expiry_date.strftime('%Y-%m-%d') if item.expiry_date else 'N/A' }}</td>
+                            <td>
+                                {% if item.stock > 0 %}
+                                <span class="text-success"><i class="fas fa-check-circle"></i> In Stock</span>
+                                {% else %}
+                                <span class="text-danger"><i class="fas fa-times-circle"></i> Out of Stock</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No medicines in inventory.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

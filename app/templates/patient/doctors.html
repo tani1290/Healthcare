@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4 mb-4">
+            <h2>Find a Doctor</h2>
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="specialty" class="form-control" placeholder="Specialty (e.g. Cardiology)"
+                        value="{{ request.args.get('specialty', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="city" class="form-control" placeholder="City"
+                        value="{{ request.args.get('city', '') }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Toggle Button for Map/List -->
+        <div class="mb-3 text-end">
+            <button class="btn btn-outline-secondary" onclick="toggleMap()">
+                <i class="fas fa-map-marked-alt"></i> Toggle Map View
+            </button>
+        </div>
+
+        <!-- Map Container (Hidden by default or side-by-side) -->
+        <div id="doctorMap" style="height: 400px; width: 100%; display: none;" class="mb-4 rounded shadow"></div>
+
+        <div class="card p-4">
+            <h4>Results</h4>
+            {% if doctors %}
+            <div class="row" id="doctorList">
+                {% for doctor in doctors %}
+                <div class="col-md-4 mb-3">
+                    <div class="card border-primary h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ doctor.name }}</h5>
+                            <p class="card-text text-muted">{{ doctor.specialty }}</p>
+                            <p class="mb-1"><small>📍 {{ doctor.city }}</small></p>
+                            <p class="mb-1"><small>🎓 {{ doctor.experience_years }} years exp</small></p>
+                            <p class="mb-3"><small>💰 Rs. {{ doctor.consultation_fees }}</small></p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}"
+                                    class="btn btn-outline-primary flex-grow-1">Book</a>
+                                {% if doctor.lat and doctor.lng %}
+                                <a href="https://www.google.com/maps/dir/?api=1&destination={{ doctor.lat }},{{ doctor.lng }}"
+                                    target="_blank" class="btn btn-outline-success" title="Get Directions">
+                                    <i class="fas fa-directions"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No doctors found matching your criteria.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    let mapInitialized = false;
+    let map;
+
+    function toggleMap() {
+        const mapDiv = document.getElementById('doctorMap');
+        if (mapDiv.style.display === 'none') {
+            mapDiv.style.display = 'block';
+            if (!mapInitialized) initMap();
+        } else {
+            mapDiv.style.display = 'none';
+        }
+    }
+
+    function initMap() {
+        // Default to Pune/India center
+        map = L.map('doctorMap').setView([18.5204, 73.8567], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add Markers
+        var doctors = [
+            {% for doctor in doctors %}
+    {% if doctor.lat and doctor.lng %}
+    {
+        name: "{{ doctor.name }}",
+            lat: { { doctor.lat } },
+        lng: { { doctor.lng } },
+        specialty: "{{ doctor.specialty }}"
+    },
+    {% endif %}
+    {% endfor %}
+        ];
+
+    doctors.forEach(doc => {
+        L.marker([doc.lat, doc.lng])
+            .addTo(map)
+            .bindPopup(`
+                    <b>${doc.name}</b><br>${doc.specialty}<br>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${doc.lat},${doc.lng}" target="_blank">Get Directions</a>
+                `);
+    });
+
+    mapInitialized = true;
+    }
+</script>
+{% endblock %}

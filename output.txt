@@ -1,0 +1,138 @@
+.
+├── __pycache__
+│   ├── add_column.cpython-313.pyc
+│   ├── add_payment_columns.cpython-313.pyc
+│   ├── check_users.cpython-313.pyc
+│   ├── config.cpython-313.pyc
+│   ├── config.cpython-314.pyc
+│   ├── init_db.cpython-313.pyc
+│   ├── manage_data.cpython-313.pyc
+│   ├── manage_data.cpython-314.pyc
+│   ├── patient_backend.cpython-313.pyc
+│   ├── run.cpython-313.pyc
+│   ├── run.cpython-314.pyc
+│   ├── seed_data.cpython-313.pyc
+│   ├── seed_enhanced_profiles.cpython-313.pyc
+│   ├── seed_history.cpython-313.pyc
+│   ├── tempCodeRunnerFile.cpython-313.pyc
+│   ├── update_db_payment_v2.cpython-313.pyc
+│   ├── update_db_payment.cpython-313.pyc
+│   ├── update_db_profiles.cpython-313.pyc
+│   └── update_db.cpython-313.pyc
+├── add_geo_columns.py
+├── app
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── __init__.cpython-314.pyc
+│   │   ├── models.cpython-313.pyc
+│   │   └── models.cpython-314.pyc
+│   ├── models.py
+│   ├── routes
+│   │   ├── __pycache__
+│   │   │   ├── ai.cpython-313.pyc
+│   │   │   ├── ai.cpython-314.pyc
+│   │   │   ├── auth.cpython-313.pyc
+│   │   │   ├── auth.cpython-314.pyc
+│   │   │   ├── doctor.cpython-313.pyc
+│   │   │   ├── doctor.cpython-314.pyc
+│   │   │   ├── hospital.cpython-313.pyc
+│   │   │   ├── hospital.cpython-314.pyc
+│   │   │   ├── medical.cpython-313.pyc
+│   │   │   ├── medical.cpython-314.pyc
+│   │   │   ├── medication.cpython-313.pyc
+│   │   │   ├── patient.cpython-313.pyc
+│   │   │   ├── patient.cpython-314.pyc
+│   │   │   ├── payment.cpython-313.pyc
+│   │   │   └── payment.cpython-314.pyc
+│   │   ├── ai.py
+│   │   ├── api
+│   │   │   └── __pycache__
+│   │   │       ├── __init__.cpython-313.pyc
+│   │   │       ├── auth.cpython-313.pyc
+│   │   │       ├── medical.cpython-313.pyc
+│   │   │       └── patient.cpython-313.pyc
+│   │   ├── auth.py
+│   │   ├── doctor.py
+│   │   ├── hospital.py
+│   │   ├── medical.py
+│   │   ├── medication.py
+│   │   ├── patient.py
+│   │   └── payment.py
+│   ├── services
+│   │   ├── __pycache__
+│   │   │   ├── ai_service.cpython-313.pyc
+│   │   │   └── ai_service.cpython-314.pyc
+│   │   └── ai_service.py
+│   ├── static
+│   │   ├── css
+│   │   │   └── style.css
+│   │   ├── img
+│   │   │   ├── bg_auth.jpg
+│   │   │   └── home_bg.jpg
+│   │   └── uploads
+│   ├── templates
+│   │   ├── auth
+│   │   │   ├── login.html
+│   │   │   ├── logout_confirm.html
+│   │   │   └── register.html
+│   │   ├── base.html
+│   │   ├── doctor
+│   │   │   ├── appointment.html
+│   │   │   ├── dashboard.html
+│   │   │   ├── edit_prescription.html
+│   │   │   ├── edit_profile.html
+│   │   │   ├── edit_slot.html
+│   │   │   ├── history.html
+│   │   │   ├── profile.html
+│   │   │   └── slots.html
+│   │   ├── hospital
+│   │   │   └── dashboard.html
+│   │   ├── medical
+│   │   │   ├── dashboard.html
+│   │   │   └── inventory.html
+│   │   ├── medication
+│   │   │   ├── add.html
+│   │   │   ├── calendar_day.html
+│   │   │   ├── calendar.html
+│   │   │   ├── dashboard.html
+│   │   │   └── notifications.html
+│   │   ├── patient
+│   │   │   ├── appointments.html
+│   │   │   ├── book.html
+│   │   │   ├── dashboard.html
+│   │   │   ├── doctors.html
+│   │   │   ├── edit_profile.html
+│   │   │   ├── history.html
+│   │   │   ├── my_orders.html
+│   │   │   ├── my_prescriptions.html
+│   │   │   ├── profile.html
+│   │   │   └── view_prescription.html
+│   │   └── payment
+│   │       ├── checkout.html
+│   │       └── success.html
+│   └── utils
+│       ├── __pycache__
+│       │   └── geocoding.cpython-314.pyc
+│       └── geocoding.py
+├── config.py
+├── healthcare.db
+├── init_db.py
+├── instance
+│   └── healthcare.db
+├── manage_data.py
+├── output.txt
+├── patient_backend.py
+├── patient_healthcare_system.sql
+├── README.md
+├── requirements.txt
+├── run.py
+├── SETUP.md
+├── struct.txt
+├── tempCodeRunnerFile.py
+├── test_key_flash.py
+├── test_key.py
+├── test_models.py
+└── View Prescription - National Patient Healthcare.pdf
+
+25 directories, 111 files

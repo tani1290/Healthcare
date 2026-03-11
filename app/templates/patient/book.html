@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h2>Book Appointment</h2>
+            <h4>{{ doctor.name }} ({{ doctor.specialty }})</h4>
+            <hr>
+
+            {% if slots %}
+            <h5>Select a Time Slot</h5>
+            <form method="post">
+                <div class="list-group mb-3">
+                    {% for slot in slots %}
+                    <label class="list-group-item d-flex gap-2">
+                        <input class="form-check-input flex-shrink-0" type="radio" name="slot_id" value="{{ slot.id }}"
+                            required>
+                        <span>
+                            {{ slot.start_time.strftime('%Y-%m-%d') }}
+                            <strong>{{ slot.start_time.strftime('%H:%M') }}</strong>
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label>Reason for Visit / Symptoms</label>
+                    <textarea name="symptoms" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Confirm Booking</button>
+            </form>
+            {% else %}
+            <div class="alert alert-warning">
+                No available slots for this doctor. Please check back later.
+            </div>
+            <a href="{{ url_for('patient.find_doctor') }}" class="btn btn-secondary">Back to Search</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

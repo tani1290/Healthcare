@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h3 class="mb-4 text-center">Edit Professional Profile</h3>
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Consultation Fees (Rs)</label>
+                    <input type="number" step="0.01" name="fees" class="form-control"
+                        value="{{ profile.consultation_fees or '' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Experience (Years)</label>
+                    <input type="number" name="experience" class="form-control"
+                        value="{{ profile.experience_years or '' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Bio</label>
+                    <textarea name="bio" class="form-control" rows="3">{{ profile.bio or '' }}</textarea>
+                </div>
+
+                <h5 class="mt-4 mb-3">Clinic Location</h5>
+                <div class="mb-3">
+                    <label class="form-label">Clinic Address</label>
+                    <textarea name="address" class="form-control" rows="2"
+                        placeholder="Enter full address">{{ profile.clinic_address or '' }}</textarea>
+                </div>
+                <!-- Map Picker -->
+                <div class="mb-3">
+                    <label class="form-label">Pin Location on Map</label>
+                    <div id="mapPicker" style="height: 300px; border-radius: 8px;" class="border"></div>
+                    <input type="hidden" name="lat" id="lat" value="{{ profile.lat or '' }}">
+                    <input type="hidden" name="lng" id="lng" value="{{ profile.lng or '' }}">
+                    <small class="text-muted">Click on the map to set your clinic location.</small>
+                </div>
+
+                <h5 class="mt-4 mb-3">Availability</h5>
+
+                <!-- Days Checklist -->
+                <div class="mb-3">
+                    <label class="form-label d-block">Available Days</label>
+                    <div class="btn-group" role="group">
+                        {% set days = profile.available_days.split(',') if profile.available_days else [] %}
+                        {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                        <input type="checkbox" class="btn-check" name="days" id="day_{{ day }}" value="{{ day }}" {% if
+                            day in days %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="day_{{ day }}">{{ day }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Dynamic Hours -->
+                <div class="mb-3">
+                    <label class="form-label">Available Hours</label>
+                    <div id="hoursContainer">
+                        <!-- Existing Hours or Default -->
+                        {% if profile.available_hours %}
+                        {% for range in profile.available_hours.split(',') %}
+                        <div class="input-group mb-2 hour-row">
+                            <input type="time" name="start_times" class="form-control"
+                                value="{{ range.split('-')[0] }}">
+                            <span class="input-group-text">to</span>
+                            <input type="time" name="end_times" class="form-control" value="{{ range.split('-')[1] }}">
+                            <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)"><i
+                                    class="fas fa-trash"></i></button>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="input-group mb-2 hour-row">
+                            <input type="time" name="start_times" class="form-control">
+                            <span class="input-group-text">to</span>
+                            <input type="time" name="end_times" class="form-control">
+                            <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)"><i
+                                    class="fas fa-trash"></i></button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-success" onclick="addHourRow()">+ Add Time
+                        Range</button>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{{ url_for('doctor.view_profile') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Hidden element to pass location data safely -->
+<div id="location-data" data-lat="{{ profile.lat if profile.lat else 18.5204 }}"
+    data-lng="{{ profile.lng if profile.lng else 73.8567 }}" style="display:none;"></div>
+
+<script>
+    // Map Logic
+    // Get location from data attributes
+    var locationData = document.getElementById('location-data');
+    var lat = parseFloat(locationData.getAttribute('data-lat')) || 18.5204;
+    var lng = parseFloat(locationData.getAttribute('data-lng')) || 73.8567;
+
+    // Initialize Map
+    var map = L.map('mapPicker').setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Initialize Marker
+    var marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+
+    // Update Hidden Inputs
+    function updateInput(l, n) {
+        document.getElementById('lat').value = l;
+        document.getElementById('lng').value = n;
+    }
+
+    // Event Listeners
+    marker.on('dragend', function (e) {
+        var pos = marker.getLatLng();
+        updateInput(pos.lat, pos.lng);
+    });
+
+    map.on('click', function (e) {
+        marker.setLatLng(e.latlng);
+        updateInput(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Force map invalidation on load to prevent rendering issues
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 100);
+
+    // Dynamic Hours Logic
+    function addHourRow() {
+        var div = document.createElement('div');
+        div.className = 'input-group mb-2 hour-row';
+        div.innerHTML = `
+            <input type="time" name="start_times" class="form-control">
+            <span class="input-group-text">to</span>
+            <input type="time" name="end_times" class="form-control">
+            <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)"><i class="fas fa-trash"></i></button>
+        `;
+        document.getElementById('hoursContainer').appendChild(div);
+    }
+
+    function removeRow(btn) {
+        btn.closest('.hour-row').remove();
+    }
+</script>
+{% endblock %}

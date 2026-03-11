@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card p-4 mb-4 shadow-sm border" style="background: var(--glass-bg); border-color: var(--glass-border) !important;">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h4 class="mb-1 fw-bold text-primary">Welcome back, {{ profile.name }}</h4>
+            <p class="text-muted mb-0">
+                {% if next_appointment %}
+                Next Appt: Dr. <span class="fw-semibold">{{ next_appointment.doctor.name }}</span> on {{ next_appointment.slot.start_time.strftime('%d %b, %I:%M %p') }}
+                {% else %}
+                No upcoming appointments. Schedule one below.
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="{{ url_for('patient.find_doctor') }}" class="btn btn-primary">Find a Doctor</a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Ribbon -->
+<div class="card p-3 mb-4 shadow-sm border" style="background: var(--glass-bg); border-color: var(--glass-border) !important;">
+    <div class="row g-3 text-center">
+        <div class="col-4 col-md-2">
+            <a href="{{ url_for('patient.find_doctor') }}" class="quick-action h-100 py-3">
+                <i class="bi bi-search"></i>
+                <span class="small fw-medium">Doctors</span>
+            </a>
+        </div>
+        <div class="col-4 col-md-2">
+            <a href="{{ url_for('patient.my_appointments') }}" class="quick-action h-100 py-3">
+                <i class="bi bi-calendar-event"></i>
+                <span class="small fw-medium">Appts</span>
+            </a>
+        </div>
+        <div class="col-4 col-md-2">
+            <a href="{{ url_for('patient.my_prescriptions') }}" class="quick-action h-100 py-3">
+                <i class="bi bi-file-medical"></i>
+                <span class="small fw-medium">Rx</span>
+            </a>
+        </div>
+        <div class="col-4 col-md-2">
+            <a href="{{ url_for('medication.dashboard') }}" class="quick-action h-100 py-3">
+                <i class="bi bi-capsule"></i>
+                <span class="small fw-medium">Meds</span>
+            </a>
+        </div>
+        <div class="col-4 col-md-2">
+            <a href="{{ url_for('patient.my_orders') }}" class="quick-action h-100 py-3">
+                <i class="bi bi-box-seam"></i>
+                <span class="small fw-medium">Orders</span>
+            </a>
+        </div>
+        <div class="col-4 col-md-2">
+            <a href="{{ url_for('patient.profile') }}" class="quick-action h-100 py-3">
+                <i class="bi bi-person"></i>
+                <span class="small fw-medium">Profile</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-value">{{ upcoming_count }}</div>
+            <div class="stat-label">Upcoming</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-value">{{ completed_visits }}</div>
+            <div class="stat-label">Visits</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-value">{{ active_prescriptions }}</div>
+            <div class="stat-label">Prescriptions</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_orders }}</div>
+            <div class="stat-label">Orders</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h5 class="fw-bold mb-3">Upcoming Appointments</h5>
+                    {% if upcoming_appointments %}
+                    {% for appt in upcoming_appointments[:3] %}
+                    <div class="appt-item">
+                        <div class="appt-avatar">{{ appt.doctor.name[0] if appt.doctor else 'D' }}</div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold" style="font-size: 0.95rem;">Dr. {{ appt.doctor.name }}</div>
+                            <div class="text-muted" style="font-size: 0.85rem;">{{ appt.doctor.specialty or 'General' }}</div>
+                        </div>
+                        <div class="text-end" style="font-size: 0.85rem;">
+                            <div class="fw-medium text-primary">{{ appt.slot.start_time.strftime('%d %b') }}</div>
+                            <div class="text-muted">{{ appt.slot.start_time.strftime('%I:%M %p') }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-calendar-check d-block mb-2" style="font-size: 2rem; color: var(--border);"></i>
+                        <p class="mb-2">Your schedule is clear</p>
+                        <a href="{{ url_for('patient.find_doctor') }}" class="btn btn-outline-primary btn-sm">Book Appointment</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-4 h-100">
+                    <h5 class="fw-bold mb-3">Medication Reminders</h5>
+                    {% if reminders %}
+                    {% for rem in reminders[:3] %}
+                    <div class="appt-item" style="border-left: 4px solid var(--warning);">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">{{ rem.medicine }}</div>
+                            <div class="text-muted small">{{ rem.dosage }}</div>
+                        </div>
+                        <span class="badge bg-warning text-dark px-2 py-1 rounded-pill shadow-sm">Take Now</span>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-shield-check d-block mb-2" style="font-size: 2rem; color: var(--success);"></i>
+                        <p class="mb-0">All clear on medications</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card p-4 h-100">
+            <h5 class="fw-bold mb-3">Health Profile</h5>
+            {% if profile.height_cm or profile.weight_kg or profile.blood_group %}
+            <div class="row text-center g-3 mt-2">
+                {% if profile.height_cm %}
+                <div class="col-4">
+                    <div class="p-3 rounded border" style="background: var(--glass-bg); border-color: var(--glass-border) !important;">
+                        <div class="fs-4 fw-bold" style="color: var(--text-primary);">{{ profile.height_cm|int }}</div>
+                        <div class="small text-uppercase" style="color: var(--text-secondary);">cm</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if profile.weight_kg %}
+                <div class="col-4">
+                    <div class="p-3 rounded border" style="background: var(--glass-bg); border-color: var(--glass-border) !important;">
+                        <div class="fs-4 fw-bold" style="color: var(--text-primary);">{{ profile.weight_kg|int }}</div>
+                        <div class="small text-uppercase" style="color: var(--text-secondary);">kg</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if profile.blood_group %}
+                <div class="col-4">
+                    <div class="p-3 rounded border border-danger border-opacity-25" style="background: var(--glass-bg); border-color: var(--glass-border) !important;">
+                        <div class="fs-4 fw-bold text-danger">{{ profile.blood_group }}</div>
+                        <div class="small text-uppercase" style="color: var(--text-secondary);">Blood</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted align-self-center mt-5">
+                <i class="bi bi-person-badge d-block mb-2" style="font-size: 2.5rem;"></i>
+                <p class="mb-3">Help us give you better care</p>
+                <a href="{{ url_for('patient.edit_profile') }}" class="btn btn-primary rounded-pill px-4">Update Profile</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

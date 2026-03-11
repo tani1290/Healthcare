@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{{ url_for('medication.medication_calendar') }}" class="btn btn-outline-secondary btn-sm mb-2">
+            <i class="fas fa-arrow-left me-1"></i> Back to Calendar
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Medications for {{ date.strftime("%B %d, %Y") }}</h4>
+        </div>
+        <div class="card-body">
+            {% if logs %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Medicine</th>
+                                <th>Dosage</th>
+                                <th>Timing</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr class="{% if log.status == 'taken' %}table-success{% elif log.status == 'missed' %}table-danger{% endif %}">
+                                <td>
+                                    {% if log.scheduled_time %}
+                                        {{ log.scheduled_time.strftime('%H:%M') }}
+                                    {% else %}
+                                        <span class="text-muted">Any time</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ log.schedule.medicine_name }}</strong></td>
+                                <td>{{ log.schedule.dosage or '-' }}</td>
+                                <td>{{ log.schedule.timing or '-' }}</td>
+                                <td>
+                                    {% if log.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif log.status == 'taken' %}
+                                        <span class="badge bg-success">Taken at {{ log.taken_time.strftime('%H:%M') if log.taken_time else '' }}</span>
+                                    {% elif log.status == 'missed' %}
+                                        <span class="badge bg-danger">Missed</span>
+                                    {% elif log.status == 'skipped' %}
+                                        <span class="badge bg-secondary">Skipped</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.status == 'pending' %}
+                                        <button class="btn btn-sm btn-success" onclick="takeMedication({{ log.id }})">
+                                            <i class="fas fa-check"></i> Take
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="skipMedication({{ log.id }})">
+                                            Skip
+                                        </button>
+                                    {% elif log.status in ['taken', 'skipped'] %}
+                                        <button class="btn btn-sm btn-outline-warning" onclick="undoMedication({{ log.id }})">
+                                            Undo
+                                        </button>
+                                    {% elif log.status == 'missed' %}
+                                        <button class="btn btn-sm btn-success" onclick="takeMedication({{ log.id }})">
+                                            <i class="fas fa-check"></i> Take Now
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                    <p class="mt-3 text-muted">No medications scheduled for this day.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function takeMedication(logId) {
+    fetch(`/medication/log/${logId}/take`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function skipMedication(logId) {
+    fetch(`/medication/log/${logId}/skip`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function undoMedication(logId) {
+    fetch(`/medication/log/${logId}/undo`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h3 class="text-center mb-4">Secure Payment</h3>
+
+            <div class="glass-box p-3 mb-4 rounded">
+                <div class="d-flex justify-content-between">
+                    <span>Order:</span>
+                    <strong>{{ title }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <span>Amount:</span>
+                    <h4 class="text-primary">${{ amount }}</h4>
+                </div>
+            </div>
+
+            <form method="post" id="payment-form">
+                <div class="mb-3">
+                    <label class="form-label">Card Number</label>
+                    <input type="text" name="card_number" class="form-control" placeholder="0000 0000 0000 0000" <form
+                        method="POST" id="paymentForm">
+                    <div class="mb-4">
+                        <label class="form-label">Select Payment Method</label>
+                        <div class="form-check card p-3 mb-2">
+                            <input class="form-check-input" type="radio" name="payment_method" id="pay_card"
+                                value="card" checked onchange="togglePaymentStuff()">
+                            <label class="form-check-label w-100" for="pay_card">
+                                <i class="fas fa-credit-card text-primary me-2"></i> Credit/Debit Card
+                            </label>
+                        </div>
+
+                        {% if type == 'order' %}
+                        <div class="form-check card p-3 mb-2">
+                            <input class="form-check-input" type="radio" name="payment_method" id="pay_cod" value="cod"
+                                onchange="togglePaymentStuff()">
+                            <label class="form-check-label w-100" for="pay_cod">
+                                <i class="fas fa-money-bill-wave text-success me-2"></i> Cash on Delivery
+                            </label>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div id="card-details">
+                        <div class="mb-3">
+                            <label for="card_number" class="form-label">Card Number (Mock)</label>
+                            <input type="text" class="form-control" id="card_number" name="card_number"
+                                placeholder="4242 4242 4242 4242">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Expiry</label>
+                                <input type="text" class="form-control" placeholder="MM/YY" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">CVV</label>
+                                <input type="password" class="form-control" placeholder="123" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mt-3" id="payBtn">Pay ₹{{ amount
+                        }}</button>
+            </form>
+
+            <div id="processing" class="text-center mt-4 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Processing secure payment...</p>
+            </div>
+        </div>
+        <div class="text-center mt-3 text-muted">
+            <small>Mock Payment Gateway - No real money is charged</small>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('payment-form').addEventListener('submit', function () {
+        document.getElementById('pay-btn').classList.add('d-none');
+        document.getElementById('processing').classList.remove('d-none');
+    });
+</script>
+{% endblock %}

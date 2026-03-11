@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h3 class="mb-4 text-center">Edit Basic Details</h3>
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" value="{{ profile.phone or '' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" class="form-control" rows="3">{{ profile.address or '' }}</textarea>
+                </div>
+
+                <h5 class="mt-4 mb-3">Vitals (Self Reported)</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Height (cm)</label>
+                        <input type="number" step="0.1" name="height_cm" class="form-control"
+                            value="{{ profile.height_cm or '' }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Weight (kg)</label>
+                        <input type="number" step="0.1" name="weight_kg" class="form-control"
+                            value="{{ profile.weight_kg or '' }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Blood Group</label>
+                        <select name="blood_group" class="form-select">
+                            <option value="">Select</option>
+                            {% for bg in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] %}
+                            <option value="{{ bg }}" {% if profile.blood_group==bg %}selected{% endif %}>{{ bg }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <h5 class="mt-4 mb-3">Medical Details</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Allergies (Comma separated)</label>
+                        <textarea name="allergies" class="form-control" rows="2"
+                            placeholder="e.g. Peanuts, Penicillin">{{ profile.allergies or '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Chronic Conditions</label>
+                        <textarea name="conditions" class="form-control" rows="2"
+                            placeholder="e.g. Diabetes, Hypertension">{{ profile.medical_conditions or '' }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{{ url_for('patient.profile') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

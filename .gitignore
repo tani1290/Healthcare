@@ -1,0 +1,70 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+venv_mac/
+.venv/
+
+# Environment variables
+.env
+
+# Database
+*.db
+instance/
+
+# VS Code
+.vscode/
+.idea/
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+
+# Logs
+*.log
+
+# Flutter/Dart (patient_app)
+patient_app/.dart_tool/
+patient_app/build/
+patient_app/.packages
+patient_app/.flutter-plugins
+patient_app/.flutter-plugins-dependencies
+
+# Temporary files
+tempCodeRunnerFile.py
+
+# Duplicate/unnecessary folders (prevent re-adding)
+patient_backend/
+patient_app/
+MEDICAL BACK AND FRONT END/
+__MACOSX/

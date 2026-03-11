@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - HealthHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('auth.login') if not current_user.is_authenticated else (url_for('patient.dashboard') if current_user.role == 'patient' else url_for('doctor.dashboard')) }}">
+                <i class="bi bi-heart-pulse me-2" style="color: var(--primary);"></i>HealthHub
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'patient' %}
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'patient.dashboard' %}active{% endif %}" href="{{ url_for('patient.dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link {% if 'medication' in request.endpoint %}active{% endif %}" href="{{ url_for('medication.dashboard') }}">Medications</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'patient.find_doctor' %}active{% endif %}" href="{{ url_for('patient.find_doctor') }}">Find Doctor</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'patient.history' %}active{% endif %}" href="{{ url_for('patient.history') }}">History</a></li>
+                    <li class="nav-item mt-1 ms-1 me-2 position-relative">
+                        <a class="nav-link" href="{{ url_for('medication.notifications') }}" title="Notifications">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger" id="notification-badge" style="font-size: 0.65rem; {% if unread_notifications_count == 0 %}display: none;{% endif %}">
+                                {{ unread_notifications_count }}
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <div class="avatar">{{ (current_user.patient_profile.name if current_user.patient_profile else current_user.username)[0]|upper }}</div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('patient.profile') }}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('patient.my_prescriptions') }}">Prescriptions</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% elif current_user.role == 'doctor' %}
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'doctor.dashboard' %}active{% endif %}" href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link {% if 'medication' in request.endpoint %}active{% endif %}" href="{{ url_for('medication.doctor_patients') }}">Patient Meds</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'doctor.manage_slots' %}active{% endif %}" href="{{ url_for('doctor.manage_slots') }}">Slots</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            Dr. {{ current_user.doctor_profile.name if current_user.doctor_profile else current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('doctor.view_profile') }}">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% elif current_user.role == 'medical' %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('medical.dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                    {% endif %}
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-primary btn-sm ms-2" href="{{ url_for('auth.register') }}">Get Started</a></li>
+                    {% endif %}
+                    <li class="nav-item ms-2">
+                        <div class="theme-toggle" onclick="toggleTheme()">
+                            <i class="bi bi-moon" id="themeIcon"></i>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div style="padding-top: 100px;"></div>
+
+    <div class="container py-4">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="bi bi-info-circle me-2"></i>{{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1055;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.getAttribute('data-bs-theme') === 'light') {
+                html.setAttribute('data-bs-theme', 'dark');
+                icon.classList.replace('bi-moon', 'bi-sun');
+            } else {
+                html.setAttribute('data-bs-theme', 'light');
+                icon.classList.replace('bi-sun', 'bi-moon');
+            }
+        }
+        
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            document.getElementById('themeIcon').classList.replace('bi-moon', 'bi-sun');
+        }
+
+        {% if current_user.is_authenticated and current_user.role == 'patient' %}
+        // Notification Polling
+        function showNotificationToast(title, message, isUrgent) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast show border-0 shadow-lg';
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            
+            const headerColor = isUrgent ? 'text-danger' : 'text-primary';
+            const iconColor = isUrgent ? 'var(--danger)' : 'var(--primary)';
+            const icon = isUrgent ? 'bi-exclamation-circle-fill' : 'bi-bell-fill';
+            const bgClass = isUrgent ? 'bg-danger-subtle' : 'glass-bg';
+            
+            toastEl.innerHTML = `
+                <div class="toast-header ${bgClass} border-bottom">
+                    <i class="bi ${icon} me-2" style="color: ${iconColor};"></i>
+                    <strong class="me-auto ${headerColor} fw-bold">${title}</strong>
+                    <small class="text-muted">Just now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                    <div class="mt-2 text-end">
+                        <a href="{{ url_for('medication.notifications') }}" class="btn btn-sm btn-outline-secondary rounded-pill">View all</a>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toastEl);
+            
+            // Auto-hide after 15 seconds
+            setTimeout(() => {
+                toastEl.classList.remove('show');
+                setTimeout(() => toastEl.remove(), 300);
+            }, 15000);
+        }
+
+        async function checkNotifications() {
+            try {
+                const response = await fetch("{{ url_for('api.trigger_reminders') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.new_notifications && data.new_notifications.length > 0) {
+                        data.new_notifications.forEach(notif => {
+                            showNotificationToast(notif.title, notif.message, notif.type === 'medication_reminder');
+                        });
+                        
+                        // Update badge
+                        const badge = document.getElementById('notification-badge');
+                        if (badge) {
+                            let currentCount = parseInt(badge.innerText || '0');
+                            currentCount += data.new_notifications.length;
+                            badge.innerText = currentCount;
+                            badge.style.display = 'inline-block';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch notifications", error);
+            }
+        }
+
+        // Check for notifications every 60 seconds
+        setInterval(checkNotifications, 60000);
+        
+        // Initial check 5 seconds after load
+        setTimeout(checkNotifications, 5000);
+        {% endif %}
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+            <h2>My Appointments</h2>
+            {% if appointments %}
+            <ul class="list-group">
+                {% for appt in appointments %}
+                <li class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Dr. {{ appt.doctor.name }} ({{ appt.doctor.specialty }})</h5>
+                        <small>{{ appt.slot.start_time.strftime('%Y-%m-%d %H:%M') if appt.slot else
+                            appt.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <p class="mb-1">Status: <strong>{{ appt.status }}</strong></p>
+                    <small>Location: {{ appt.doctor.clinic_address or appt.doctor.city }}</small>
+
+                    {% if appt.prescription %}
+                    <div class="mt-2">
+                        <a href="{{ url_for('patient.view_prescription', id=appt.prescription.id) }}"
+                            class="btn btn-sm btn-info text-white">View Prescription</a>
+                        <!-- Redirect to View Prescription because Order requires location/item selection now -->
+                        <a href="{{ url_for('patient.view_prescription', id=appt.prescription.id) }}"
+                            class="btn btn-sm btn-success">Order Medicines</a>
+                        <button
+                            onclick="window.location.href='{{ url_for('patient.view_prescription', id=appt.prescription.id) }}'"
+                            class="btn btn-sm btn-outline-secondary"><i class="fas fa-print"></i> Print</button>
+                    </div>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No upcoming appointments.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

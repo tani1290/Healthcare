@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{{ url_for('medication.dashboard') }}" class="btn btn-outline-secondary btn-sm mb-2">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <h2><i class="fas fa-calendar-alt me-2"></i>Medication Calendar</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('medication.medication_calendar', year=prev_year, month=prev_month) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                        <h4 class="mb-0">{{ month_name }} {{ year }}</h4>
+                        <a href="{{ url_for('medication.medication_calendar', year=next_year, month=next_month) }}" class="btn btn-sm btn-outline-primary">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered calendar-table">
+                            <thead>
+                                <tr class="table-light">
+                                    <th class="text-center">Sun</th>
+                                    <th class="text-center">Mon</th>
+                                    <th class="text-center">Tue</th>
+                                    <th class="text-center">Wed</th>
+                                    <th class="text-center">Thu</th>
+                                    <th class="text-center">Fri</th>
+                                    <th class="text-center">Sat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for week in month_days %}
+                                <tr>
+                                    {% for day in week %}
+                                    <td class="calendar-day {% if day == 0 %}glass-box{% endif %} {% if year == today.year and month == today.month and day == today.day %}table-primary{% endif %}" 
+                                        {% if day > 0 %}data-date="{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(day) }}"{% endif %}>
+                                        {% if day > 0 %}
+                                            <div class="day-number {% if year == today.year and month == today.month and day == today.day %}fw-bold text-primary{% endif %}">
+                                                {{ day }}
+                                            </div>
+                                            {% set date_key = year ~ '-' ~ ('%02d'|format(month)) ~ '-' ~ ('%02d'|format(day)) %}
+                                            {% if date_key in logs_by_date %}
+                                                <div class="day-stats mt-1">
+                                                    {% if logs_by_date[date_key].taken > 0 %}
+                                                        <span class="badge bg-success" title="Taken">{{ logs_by_date[date_key].taken }}</span>
+                                                    {% endif %}
+                                                    {% if logs_by_date[date_key].missed > 0 %}
+                                                        <span class="badge bg-danger" title="Missed">{{ logs_by_date[date_key].missed }}</span>
+                                                    {% endif %}
+                                                    {% if logs_by_date[date_key].pending > 0 %}
+                                                        <span class="badge bg-warning " title="Pending">{{ logs_by_date[date_key].pending }}</span>
+                                                    {% endif %}
+                                                </div>
+                                                <a href="{{ url_for('medication.calendar_day', date=date_key) }}" class="btn btn-sm btn-outline-info mt-1">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Legend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-success me-2">0</span>
+                        <small>All Taken</small>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-danger me-2">0</span>
+                        <small>Missed</small>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-warning  me-2">0</span>
+                        <small>Pending</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge glass-box border  me-2">0</span>
+                        <small>Mixed</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    {% set total_taken = 0 %}
+                    {% set total_missed = 0 %}
+                    {% set total_pending = 0 %}
+                    {% for date_key, stats in logs_by_date.items() %}
+                        {% set total_taken = total_taken + stats.taken %}
+                        {% set total_missed = total_missed + stats.missed %}
+                        {% set total_pending = total_pending + stats.pending %}
+                    {% endfor %}
+                    
+                    <div class="text-center">
+                        <h3 class="text-success">{{ total_taken }}</h3>
+                        <small class="text-muted">Doses Taken</small>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h3 class="text-danger">{{ total_missed }}</h3>
+                        <small class="text-muted">Doses Missed</small>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h3 class="text-warning">{{ total_pending }}</h3>
+                        <small class="text-muted">Doses Pending</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.calendar-table td {
+    height: 100px;
+    vertical-align: top;
+    cursor: pointer;
+}
+.calendar-table td:hover:not(.glass-box) {
+    background-color: rgba(128, 128, 128, 0.1);
+}
+.day-number {
+    font-size: 1.1rem;
+}
+.day-stats {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

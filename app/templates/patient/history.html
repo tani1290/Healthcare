@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+            <h2>Medical History</h2>
+            <!-- TABS -->
+            <ul class="nav nav-tabs mb-4" id="historyTab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general"
+                        type="button">General History</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="appts-tab" data-bs-toggle="tab" data-bs-target="#appts"
+                        type="button">Visits</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs"
+                        type="button">Audit Log</button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- General -->
+                <div class="tab-pane fade show active" id="general">
+                    <div class="d-flex justify-content-between mb-3">
+                        <h5>My Records</h5>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addRecordModal">
+                            <i class="fas fa-plus"></i> Add Report
+                        </button>
+                    </div>
+                    {% if history_records %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Condition/Title</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in history_records %}
+                                <tr>
+                                    <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
+                                    <td><strong>{{ record.title }}</strong></td>
+                                    <td>{{ record.description }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p>No general records found.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Appointments -->
+                <div class="tab-pane fade" id="appts">
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Doctor</th>
+                                    <th>Prescription</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appt in appointments %}
+                                <tr>
+                                    <td>{{ appt.slot.start_time.strftime('%Y-%m-%d') if appt.slot else
+                                        appt.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ appt.doctor.name }}</td>
+                                    <td>
+                                        {% if appt.prescription %}
+                                        <strong>Rx:</strong>
+                                        {% for item in appt.prescription.items %}
+                                        <div>{{ item.medicine }}</div>
+                                        {% endfor %}
+                                        {% else %}
+                                        <span class="text-muted">None</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if appt.prescription %}
+                                        <a href="{{ url_for('patient.view_prescription', id=appt.prescription.id) }}"
+                                            class="btn btn-sm btn-info text-white">View</a>
+                                        <a href="{{ url_for('patient.order_medicines', prescription_id=appt.prescription.id) }}"
+                                            class="btn btn-sm btn-success">Order Meds</a>
+                                        {% else %}
+                                        <span class="text-muted">No Prescription</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p>No visits found.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Logs -->
+                <div class="tab-pane fade" id="logs">
+                    <h5>Changes Log</h5>
+                    {% if logs %}
+                    <ul class="list-group">
+                        {% for log in logs %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ log.action }}</strong>
+                                <br><small class="text-muted">{{ log.performed_by }}</small>
+                            </div>
+                            <span class="text-muted small">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>No logs available.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="addRecordModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add Self-Reported Record</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="{{ url_for('patient.add_history_record') }}" method="POST">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" name="title" class="form-control" required
+                                        placeholder="e.g. Blood Pressure at Home">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" name="date" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Details</label>
+                                    <textarea name="description" class="form-control" rows="3" required
+                                        placeholder="e.g. 120/80"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .med-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+    }
+
+    .med-card:hover {
+        border-color: var(--primary);
+    }
+
+    .med-time {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary);
+        min-width: 70px;
+    }
+
+    .med-info h6 {
+        font-weight: 600;
+        margin-bottom: 2px;
+        font-size: 0.95rem;
+    }
+
+    .med-info p {
+        color: var(--gray);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .btn-take {
+        background: var(--primary);
+        border: none;
+        padding: 8px 20px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    .btn-take:hover {
+        background: var(--primary-light);
+        color: white;
+    }
+
+    .btn-skip {
+        background: transparent;
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: 6px;
+        color: var(--gray);
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    .btn-skip:hover {
+        border-color: var(--gray);
+        color: var(--dark);
+    }
+
+    .quick-action {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+        text-decoration: none;
+        color: var(--dark);
+        transition: all 0.2s ease;
+        display: block;
+    }
+
+    .quick-action:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .quick-action i {
+        font-size: 1.3rem;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .quick-action span {
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 1.5rem;
+        color: var(--success);
+    }
+
+    .section-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--dark);
+    }
+
+    .fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: var(--primary);
+        border: none;
+        color: white;
+        font-size: 1.3rem;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .fab:hover {
+        background: var(--primary-light);
+        transform: scale(1.05);
+    }
+</style>
+
+<div class="page-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h4 class="mb-1"><i class="bi bi-capsule me-2" style="color: var(--primary);"></i>Medications</h4>
+            <p class="text-muted mb-0">{{ today.strftime('%A, %B %d, %Y') }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('medication.medication_calendar') }}" class="btn btn-outline-primary btn-sm">Calendar</a>
+        </div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <i class="bi bi-info-circle me-2"></i>{{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_today|length + missed_today|length }}</div>
+            <div class="text-muted" style="font-size: 0.85rem;">Pending</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-number" style="color: var(--success);">{{ taken_today|length }}</div>
+            <div class="text-muted" style="font-size: 0.85rem;">Taken</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-number" style="color: var(--warning);">{{ adherence_rate }}%</div>
+            <div class="text-muted" style="font-size: 0.85rem;">Adherence</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card p-4">
+            <h5 class="section-title"><i class="bi bi-clock me-2"></i>Today's Schedule</h5>
+            
+            {% if pending_today or missed_today %}
+                {% for log in pending_today + missed_today %}
+                <div class="med-card" id="log-{{ log.id }}">
+                    <div class="d-flex align-items-center">
+                        <div class="med-time">
+                            {% if log.scheduled_time %}
+                                {{ log.scheduled_time.strftime('%H:%M') }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </div>
+                        <div class="med-info">
+                            <h6>{{ log.schedule.medicine_name }}</h6>
+                            <p>{{ log.schedule.dosage }} • {{ log.schedule.timing or 'As directed' }}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        {% if log.status == 'pending' %}
+                        <button class="btn-take" onclick="takeMedication({{ log.id }})">Take</button>
+                        <button class="btn-skip" onclick="skipMedication({{ log.id }})">Skip</button>
+                        {% elif log.status == 'missed' %}
+                        <button class="btn-take" onclick="takeMedication({{ log.id }})">Take Now</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-check"></i></div>
+                    <h6>All Done!</h6>
+                    <p class="text-muted mb-0">No medications pending</p>
+                </div>
+            {% endif %}
+
+            {% if taken_today %}
+            <h6 class="mt-4 mb-3" style="color: var(--success); font-size: 0.9rem;">Completed</h6>
+            {% for log in taken_today %}
+            <div class="med-card" style="opacity: 0.7;">
+                <div class="d-flex align-items-center">
+                    <div class="med-time" style="color: var(--success);">
+                        {% if log.taken_time %}{{ log.taken_time.strftime('%H:%M') }}{% endif %}
+                    </div>
+                    <div class="med-info">
+                        <h6>{{ log.schedule.medicine_name }}</h6>
+                        <p>{{ log.schedule.dosage }}</p>
+                    </div>
+                </div>
+                <span class="badge" style="background: var(--success); padding: 6px 12px; border-radius: 6px; font-size: 0.75rem;">Taken</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card p-4 mb-4">
+            <h5 class="section-title"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+            <div class="row g-2">
+                <div class="col-6">
+                    <a href="{{ url_for('medication.add_medication') }}" class="quick-action">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Add Med</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="{{ url_for('patient.my_prescriptions') }}" class="quick-action">
+                        <i class="bi bi-file-medical"></i>
+                        <span>Prescriptions</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="{{ url_for('medication.medication_calendar') }}" class="quick-action">
+                        <i class="bi bi-calendar3"></i>
+                        <span>Calendar</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="{{ url_for('patient.dashboard') }}" class="quick-action">
+                        <i class="bi bi-house"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4">
+            <h5 class="section-title"><i class="bi bi-fire me-2"></i>Streak</h5>
+            <div class="text-center py-2">
+                <div class="stat-number" style="font-size: 2.5rem;">{{ streak }}</div>
+                <div class="text-muted" style="font-size: 0.85rem;">days in a row</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="{{ url_for('medication.add_medication') }}" class="fab">
+    <i class="bi bi-plus"></i>
+</a>
+
+<script>
+function takeMedication(logId) {
+    fetch(`/medication/log/${logId}/take`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else if (data.error) {
+            alert(data.error);
+        }
+    });
+}
+
+function skipMedication(logId) {
+    fetch(`/medication/log/${logId}/skip`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>🏥 Pharmacy Dashboard</h2>
+            <a href="{{ url_for('medical.inventory') }}" class="btn btn-primary"><i class="fas fa-boxes"></i> Manage
+                Inventory</a>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-header">New Orders</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ new_orders|length }}</h5>
+                        <p class="card-text">Waiting to be dispatched.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning mb-3">
+                    <div class="card-header">Out for Delivery</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ active_orders|length }}</h5>
+                        <p class="card-text">Currently in transit.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-header">Completed</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ completed_orders|length }}</h5>
+                        <p class="card-text">Last 10 delivered orders.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="new-tab" data-bs-toggle="tab" href="#new" role="tab">New Orders</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="active-tab" data-bs-toggle="tab" href="#active" role="tab">Out for Delivery</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="completed-tab" data-bs-toggle="tab" href="#completed" role="tab">Completed</a>
+            </li>
+        </ul>
+
+        <div class="tab-content border border-top-0 p-3 glass-box" id="orderTabsContent">
+            <!-- New Orders -->
+            <div class="tab-pane fade show active" id="new" role="tabpanel">
+                {% if new_orders %}
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Patient / Type</th>
+                            <th>Items</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in new_orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>
+                                <strong>{{ order.patient.name }}</strong><br>
+                                {% if order.delivery_type == 'pickup' %}
+                                <span class="badge bg-info ">Store Pickup</span>
+                                {% else %}
+                                <span class="badge bg-primary">Home Delivery</span><br>
+                                <small class="text-muted">{{ order.delivery_address }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.items }}</td>
+                            <td>
+                                {% if order.delivery_lat and order.delivery_lng %}
+                                <button class="btn btn-sm btn-info text-white"
+                                    onclick="showRoute({{ order.delivery_lat }}, {{ order.delivery_lng }})">
+                                    <i class="fas fa-route"></i> Route
+                                </button>
+                                {% endif %}
+                                <a href="{{ url_for('medical.pack_order', order_id=order.id) }}"
+                                    class="btn btn-warning btn-sm">📦 Mark Packed</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted p-3">No new orders.</p>
+                {% endif %}
+            </div>
+
+            <!-- Active Orders (Packed/Dispatched) -->
+            <div class="tab-pane fade" id="active" role="tabpanel">
+                {% if active_orders %}
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Status</th>
+                            <th>Patient / Type</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in active_orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ order.status|upper }}</span>
+                            </td>
+                            <td>
+                                {{ order.patient.name }}
+                                <br>
+                                {% if order.delivery_type == 'pickup' %}
+                                <small>Pickup</small>
+                                {% else %}
+                                <small>Delivery to: {{ order.delivery_address }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if order.status == 'packed' %}
+                                {% if order.delivery_type == 'pickup' %}
+                                <a href="{{ url_for('medical.deliver_order', order_id=order.id) }}"
+                                    class="btn btn-success btn-sm">✅ Handover to Patient</a>
+                                {% else %}
+                                <button onclick="openDispatchModal({{ order.id }})" class="btn btn-info btn-sm">🚚
+                                    Dispatch</button>
+                                {% endif %}
+                                {% elif order.status == 'dispatched' %}
+                                <a href="{{ url_for('medical.deliver_order', order_id=order.id) }}"
+                                    class="btn btn-success btn-sm">✅ Mark Delivered</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted p-3">No active orders.</p>
+                {% endif %}
+            </div>
+
+            <!-- Completed Orders -->
+            <div class="tab-pane fade" id="completed" role="tabpanel">
+                {% if completed_orders %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Patient</th>
+                            <th>Type</th>
+                            <th>Items</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in completed_orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.patient.name }}</td>
+                            <td>{{ order.delivery_type|upper }}</td>
+                            <td>{{ order.items }}</td>
+                            <td><span class="badge bg-success">Complete</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted p-3">No completed orders yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Map Modal -->
+<div class="modal fade" id="routeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delivery Route</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="routeMap" style="height: 400px; width: 100%;"></div>
+                <div class="mt-3 text-end">
+                    <button class="btn btn-secondary me-2" onclick="copyRouteLink()">
+                        <i class="fas fa-copy"></i> Copy Link
+                    </button>
+                    <a id="whatsappShareLink" href="#" target="_blank" class="btn btn-success me-2">
+                        <i class="fab fa-whatsapp"></i> Share
+                    </a>
+                    <a id="googleMapsLink" href="#" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-location-arrow"></i> Open in Google Maps
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dispatch Modal -->
+<div class="modal fade" id="dispatchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dispatch Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="dispatchForm" method="POST">
+                <div class="modal-body">
+                    <p>Assign a delivery agent and set an ETA.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Delivery Agent Name</label>
+                        <input type="text" name="agent_name" class="form-control" required
+                            placeholder="e.g. Rahul Kumar">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estimated Delivery Time (ETA)</label>
+                        <input type="text" name="eta" class="form-control" required placeholder="e.g. 45 mins">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm Dispatch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let map;
+    let routingControl;
+
+    function copyRouteLink() {
+        const link = document.getElementById('routeModal').dataset.link;
+        if (link) {
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Route link copied to clipboard!");
+            });
+        }
+    }
+
+    function openDispatchModal(orderId) {
+        var form = document.getElementById('dispatchForm');
+        form.action = "{{ url_for('medical.dispatch_order', order_id=0) }}".replace('0', orderId);
+        new bootstrap.Modal(document.getElementById('dispatchModal')).show();
+    }
+
+    function showRoute(destLat, destLng) {
+        // Show modal
+        new bootstrap.Modal(document.getElementById('routeModal')).show();
+
+        // Construct Google Maps URL
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`;
+
+        // Update Links
+        document.getElementById('googleMapsLink').href = mapsUrl;
+
+        // WhatsApp Share Link
+        const waText = encodeURIComponent(`Deliver order here: ${mapsUrl}`);
+        document.getElementById('whatsappShareLink').href = `https://wa.me/?text=${waText}`;
+
+        // Store for copy button
+        document.getElementById('routeModal').dataset.link = mapsUrl;
+
+        // Wait for modal to slide down
+        setTimeout(() => {
+            if (!map) {
+                map = L.map('routeMap').setView([18.5204, 73.8567], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+            }
+
+            // Fixed Pharmacy Location (Punawale, Pune)
+            const pharmacyLat = 18.6369;
+            const pharmacyLng = 73.7508;
+
+            // Remove previous route
+            if (routingControl) {
+                map.removeControl(routingControl);
+            }
+
+            // Draw new route
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(pharmacyLat, pharmacyLng),
+                    L.latLng(destLat, destLng)
+                ],
+                routeWhileDragging: false,
+                addWaypoints: false,
+                draggableWaypoints: false,
+                fitSelectedRoutes: true
+            }).addTo(map);
+
+        }, 500);
+    }
+</script>
+{% endblock %}

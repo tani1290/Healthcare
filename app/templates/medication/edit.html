@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{{ url_for('medication.dashboard') }}" class="btn btn-outline-secondary btn-sm mb-2">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Medication</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="medicine_name" class="form-label">Medicine Name *</label>
+                                <input type="text" class="form-control" id="medicine_name" name="medicine_name" value="{{ schedule.medicine_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dosage" class="form-label">Dosage</label>
+                                <input type="text" class="form-control" id="dosage" name="dosage" value="{{ schedule.dosage or '' }}" placeholder="e.g. 500mg, 10ml">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="frequency" class="form-label">Frequency</label>
+                                <select class="form-select" id="frequency" name="frequency">
+                                    <option value="">Select frequency</option>
+                                    <option value="1-0-0" {% if schedule.frequency == '1-0-0' %}selected{% endif %}>Once daily (Morning)</option>
+                                    <option value="0-1-0" {% if schedule.frequency == '0-1-0' %}selected{% endif %}>Once daily (Afternoon)</option>
+                                    <option value="0-0-1" {% if schedule.frequency == '0-0-1' %}selected{% endif %}>Once daily (Evening)</option>
+                                    <option value="1-1-1" {% if schedule.frequency == '1-1-1' %}selected{% endif %}>Three times daily</option>
+                                    <option value="1-1-0" {% if schedule.frequency == '1-1-0' %}selected{% endif %}>Twice daily (Morning, Afternoon)</option>
+                                    <option value="1-0-1" {% if schedule.frequency == '1-0-1' %}selected{% endif %}>Twice daily (Morning, Evening)</option>
+                                    <option value="0-1-1" {% if schedule.frequency == '0-1-1' %}selected{% endif %}>Twice daily (Afternoon, Evening)</option>
+                                    <option value="1-0-0-0" {% if schedule.frequency == '1-0-0-0' %}selected{% endif %}>Four times daily</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="times" class="form-label">Times (HH:MM format, comma separated) *</label>
+                                <input type="text" class="form-control" id="times" name="times" value="{{ schedule.times }}" required>
+                                <small class="text-muted">Enter times like: 08:00, 14:00, 20:00</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="timing" class="form-label">Timing</label>
+                                <select class="form-select" id="timing" name="timing">
+                                    <option value="">Select timing</option>
+                                    <option value="Before Food" {% if schedule.timing == 'Before Food' %}selected{% endif %}>Before Food</option>
+                                    <option value="After Food" {% if schedule.timing == 'After Food' %}selected{% endif %}>After Food</option>
+                                    <option value="With Food" {% if schedule.timing == 'With Food' %}selected{% endif %}>With Food</option>
+                                    <option value="Empty Stomach" {% if schedule.timing == 'Empty Stomach' %}selected{% endif %}>Empty Stomach</option>
+                                    <option value="At Bedtime" {% if schedule.timing == 'At Bedtime' %}selected{% endif %}>At Bedtime</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="start_date" class="form-label">Start Date *</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ schedule.start_date.strftime('%Y-%m-%d') }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ schedule.end_date.strftime('%Y-%m-%d') if schedule.end_date else '' }}">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Note:</strong> Editing this medication will regenerate all scheduled logs for the next 30 days.
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('medication.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('frequency').addEventListener('change', function() {
+    const timesInput = document.getElementById('times');
+    const frequency = this.value;
+    
+    const timeMap = {
+        '1-0-0': '08:00',
+        '0-1-0': '14:00',
+        '0-0-1': '20:00',
+        '1-1-1': '08:00, 14:00, 20:00',
+        '1-1-0': '08:00, 14:00',
+        '1-0-1': '08:00, 20:00',
+        '0-1-1': '14:00, 20:00',
+        '1-0-0-0': '08:00, 12:00, 16:00, 20:00'
+    };
+    
+    if (frequency && timeMap[frequency]) {
+        timesInput.value = timeMap[frequency];
+    }
+});
+</script>
+{% endblock %}

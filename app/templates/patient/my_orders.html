@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card p-4">
+            <h2 class="mb-4">📦 My Orders</h2>
+
+            {% if orders %}
+            <div class="accordion" id="ordersAccordion">
+                {% for order in orders %}
+                <div class="accordion-item mb-3 border rounded shadow-sm">
+                    <h2 class="accordion-header" id="heading{{ order.id }}">
+                        <button class="accordion-button {% if loop.index > 1 %}collapsed{% endif %}" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapse{{ order.id }}" aria-expanded="true"
+                            aria-controls="collapse{{ order.id }}">
+                            <div class="d-flex justify-content-between w-100 me-3">
+                                <div>
+                                    <strong>Order #{{ order.id }}</strong>
+                                    <span class="text-muted ms-2">{{ order.created_at.strftime('%d %b %Y') }}</span>
+                                </div>
+                                <div>
+                                    <span
+                                        class="badge bg-{{ 'success' if order.status == 'delivered' else 'primary' if order.status == 'placed' else 'warning' }}">
+                                        {{ order.status|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse{{ order.id }}"
+                        class="accordion-collapse collapse {% if loop.index == 1 %}show{% endif %}"
+                        aria-labelledby="heading{{ order.id }}" data-bs-parent="#ordersAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <!-- Order Details -->
+                                <div class="col-md-6 border-end">
+                                    <h5>Medicines</h5>
+                                    <p class="text-muted">{{ order.items }}</p>
+                                    <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+
+                                    {% if order.delivery_type == 'delivery' %}
+                                    <div class="alert alert-light border">
+                                        <i class="fas fa-map-marker-alt text-danger"></i>
+                                        <strong>Delivery Address:</strong><br>
+                                        {{ order.delivery_address }}
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-store"></i> <strong>Store Pickup</strong>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Status Tracker -->
+                                <div class="col-md-6">
+                                    <h5>Tracking</h5>
+
+                                    <ul class="list-group list-group-flush position-relative">
+                                        <!-- Vertical Line -->
+                                        <div class="position-absolute h-100 border-start"
+                                            style="left: 15px; top: 10px; z-index: 0;"></div>
+
+                                        <li class="list-group-item border-0 bg-transparent ps-4 position-relative">
+                                            <span class="position-absolute bg-primary rounded-circle"
+                                                style="width: 12px; height: 12px; left: 10px; top: 18px;"></span>
+                                            <div class="fw-bold">Placed</div>
+                                            <small class="text-muted">Order received successfully.</small>
+                                        </li>
+
+                                        <li class="list-group-item border-0 bg-transparent ps-4 position-relative">
+                                            <span
+                                                class="position-absolute bg-{{ 'primary' if order.status in ['packed', 'dispatched', 'delivered'] else 'secondary' }} rounded-circle"
+                                                style="width: 12px; height: 12px; left: 10px; top: 18px;"></span>
+                                            <div
+                                                class="{{ 'fw-bold' if order.status in ['packed', 'dispatched', 'delivered'] else 'text-muted' }}">
+                                                Packed</div>
+                                            {% if order.status in ['packed', 'dispatched', 'delivered'] %}
+                                            <small class="text-success"><i class="fas fa-check"></i> Ready for
+                                                dispatch</small>
+                                            {% endif %}
+                                        </li>
+
+                                        <li class="list-group-item border-0 bg-transparent ps-4 position-relative">
+                                            <span
+                                                class="position-absolute bg-{{ 'warning' if order.status in ['dispatched', 'delivered'] else 'secondary' }} rounded-circle"
+                                                style="width: 12px; height: 12px; left: 10px; top: 18px;"></span>
+                                            <div
+                                                class="{{ 'fw-bold' if order.status in ['dispatched', 'delivered'] else 'text-muted' }}">
+                                                Out for Delivery</div>
+                                            {% if order.status in ['dispatched', 'delivered'] %}
+                                            <small class="text-dark">
+                                                Agent: <strong>{{ order.delivery_agent or 'Assigned Agent'
+                                                    }}</strong><br>
+                                            </small>
+                                            {% if order.eta %}
+                                            <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> ETA:
+                                                {{ order.eta }}</span>
+                                            {% endif %}
+                                            {% endif %}
+                                        </li>
+
+                                        <li class="list-group-item border-0 bg-transparent ps-4 position-relative">
+                                            <span
+                                                class="position-absolute bg-{{ 'success' if order.status == 'delivered' else 'secondary' }} rounded-circle"
+                                                style="width: 12px; height: 12px; left: 10px; top: 18px;"></span>
+                                            <div
+                                                class="{{ 'fw-bold' if order.status == 'delivered' else 'text-muted' }}">
+                                                Delivered</div>
+                                            {% if order.status == 'delivered' %}
+                                            <small class="text-success">Package delivered successfully.</small>
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <p class="lead text-muted">You have no active orders.</p>
+                <a href="{{ url_for('patient.my_prescriptions') }}" class="btn btn-primary">Order Medicines</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

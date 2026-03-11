@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+            <h2>My Prescriptions</h2>
+            {% if appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Doctor</th>
+                            <th>Medicines</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in appointments %}
+                        <tr>
+                            <td>{{ appt.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>Dr. {{ appt.doctor.name }}<br><small class="text-muted">{{ appt.doctor.specialty
+                                    }}</small></td>
+                            <td>
+                                {% for item in appt.prescription.items %}
+                                <span class="badge glass-box  border">{{ item.medicine }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('patient.view_prescription', id=appt.prescription.id) }}"
+                                    class="btn btn-sm btn-primary">View & Order</a>
+                                <a href="{{ url_for('medication.import_from_prescription', prescription_id=appt.prescription.id) }}"
+                                    class="btn btn-sm btn-outline-success" title="Add to Medication Tracker"><i class="fas fa-plus-circle"></i> Add to Tracker</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                No prescriptions found.
+            </div>
+            {% endif %}
+
+            <div class="mt-3">
+                <a href="{{ url_for('patient.dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+            <h2>Hospital Administration</h2>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card p-3 text-white bg-primary mb-3">
+                        <h3>{{ doc_count }}</h3>
+                        <p>Total Doctors</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-white bg-success mb-3">
+                        <h3>{{ patient_count }}</h3>
+                        <p>Total Patients</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-white bg-warning mb-3">
+                        <h3>{{ appt_count }}</h3>
+                        <p>Total Appointments</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h4>Staff Management</h4>
+                <p>Manage doctors, nurses, and other staff members.</p>
+                <button class="btn btn-outline-secondary" disabled>Coming Soon</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

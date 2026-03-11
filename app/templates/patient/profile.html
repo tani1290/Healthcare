@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar / Basic Info -->
+    <div class="col-md-4">
+        <div class="card p-4 text-center mb-4">
+            <div class="mb-3">
+                <i class="fas fa-user-circle fa-5x text-primary"></i>
+            </div>
+            <h3>{{ profile.name }}</h3>
+            <p class="text-muted"><i class="fas fa-id-card me-2"></i>Patient ID: {{ profile.id }}</p>
+            <hr>
+            <div class="text-start">
+                <p><strong>Email:</strong> {{ current_user.email }}</p>
+                <p><strong>Phone:</strong> {{ profile.phone }}</p>
+                <p><strong>DOB:</strong> {{ profile.dob }}</p>
+                <p><strong>Address:</strong> {{ profile.address }}</p>
+            </div>
+            <a href="{{ url_for('patient.edit_profile') }}" class="btn btn-outline-primary btn-sm mt-3">Edit Basic
+                Details</a>
+        </div>
+    </div>
+
+    <!-- Main Content / Vitals -->
+    <div class="col-md-8">
+        <div class="card p-4 mb-4">
+            <h4 class="mb-4 text-primary"><i class="fas fa-heartbeat me-2"></i>Health Vitals</h4>
+
+            <div class="row g-4 text-center">
+                <div class="col-md-3 col-6">
+                    <div class="p-3 glass-box rounded">
+                        <small class="text-muted d-block uppercase fw-bold">HEIGHT</small>
+                        <h4 class="mb-0 ">{{ profile.height_cm }} <span class="fs-6 text-muted">cm</span></h4>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 glass-box rounded">
+                        <small class="text-muted d-block uppercase fw-bold">WEIGHT</small>
+                        <h4 class="mb-0 ">{{ profile.weight_kg }} <span class="fs-6 text-muted">kg</span></h4>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 glass-box rounded">
+                        <small class="text-muted d-block uppercase fw-bold">BMI</small>
+                        <!-- Simple BMI Calc Logic in template for display -->
+                        {% if profile.height_cm and profile.weight_kg %}
+                        {% set h_m = profile.height_cm / 100 %}
+                        <h4 class="mb-0 ">{{ (profile.weight_kg / (h_m * h_m))|round(1) }}</h4>
+                        {% else %}
+                        <h4 class="mb-0 text-muted">-</h4>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 glass-box rounded">
+                        <small class="text-muted d-block uppercase fw-bold">BLOOD</small>
+                        <h4 class="mb-0 text-danger">{{ profile.blood_group }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-4">
+        <h4 class="mb-3 text-primary"><i class="fas fa-notes-medical me-2"></i>Medical Info</h4>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <p class="mb-1 text-muted fw-bold">ALLERGIES</p>
+                {% if profile.allergies %}
+                {% for allergy in profile.allergies.split(',') %}
+                <span class="badge bg-danger mb-1">{{ allergy.strip() }}</span>
+                {% endfor %}
+                {% else %}
+                <span class="text-muted small">None listed</span>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <p class="mb-1 text-muted fw-bold">CONDITIONS</p>
+                {% if profile.medical_conditions %}
+                {% for condition in profile.medical_conditions.split(',') %}
+                <span class="badge bg-warning  mb-1">{{ condition.strip() }}</span>
+                {% endfor %}
+                {% else %}
+                <span class="text-muted small">None listed</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h4 class="mb-3 text-primary"><i class="fas fa-walking me-2"></i>Lifestyle</h4>
+        {% if profile.lifestyle_data %}
+        <div class="glass-box p-3 rounded">
+            <code class="">{{ profile.lifestyle_data }}</code>
+            <!-- In a real app, parse this JSON and display nicely -->
+        </div>
+        {% else %}
+        <p class="text-muted">No lifestyle data recorded.</p>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}

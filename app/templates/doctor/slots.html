@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card p-4">
+            <h2>Manage Slots</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card p-3 mb-3">
+                        <h4><i class="fas fa-magic"></i> Generate Slots</h4>
+                        <p class="text-muted small">Automatically create slots for a date based on your working hours.
+                        </p>
+                        <form method="post" action="{{ url_for('doctor.generate_slots') }}">
+                            <div class="mb-3">
+                                <label>Target Date</label>
+                                <input type="date" name="date" class="form-control" required min="{{ min_date }}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Working Hours (From Profile)</label>
+                                {% if current_user.doctor_profile.available_hours %}
+                                {% for range in current_user.doctor_profile.available_hours.split(',') %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="time_ranges"
+                                        value="{{ range }}" checked>
+                                    <label class="form-check-label">{{ range }}</label>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <p class="text-danger small">No working hours set in profile.</p>
+                                {% endif %}
+                                <div class="form-text">Uncheck to skip a specific time block.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Visit Duration (Minutes)</label>
+                                <input type="number" name="duration" class="form-control" value="15" min="5" step="5"
+                                    required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Generate Slots</button>
+                        </form>
+                    </div>
+
+                    <!-- Single Slot Manual Add (Collapsed) -->
+                    <div class="accordion" id="manualSlot">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOne">
+                                    Manual Add
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#manualSlot">
+                                <div class="accordion-body">
+                                    <form method="post" action="{{ url_for('doctor.manage_slots') }}">
+                                        <div class="mb-3">
+                                            <label>Start Time</label>
+                                            <input type="datetime-local" name="start_time" class="form-control"
+                                                required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>Duration (mins)</label>
+                                            <input type="number" name="duration" class="form-control" value="30"
+                                                required>
+                                        </div>
+                                        <button type="submit" class="btn btn-secondary btn-sm">Add Single</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card p-3">
+                        <h4>Your Slots</h4>
+                        {% if slots %}
+                        <ul class="list-group">
+                            {% for slot in slots %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ slot.start_time.strftime('%Y-%m-%d %H:%M') }} - {{ slot.end_time.strftime('%H:%M') }}
+                                {% if slot.is_booked %}
+                                <span class="badge bg-danger">Booked</span>
+                                {% else %}
+                                <div>
+                                    <span class="badge bg-success me-2">Available</span>
+                                    <a href="{{ url_for('doctor.edit_slot', id=slot.id) }}"
+                                        class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <a href="{{ url_for('doctor.delete_slot', id=slot.id) }}"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Are you sure?')">Delete</a>
+                                </div>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>No slots added yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

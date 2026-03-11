@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h2>Edit Prescription</h2>
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Medicines</label>
+                    <table class="table table-bordered" id="rx-table">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Dosage</th>
+                                <th>Frequency</th>
+                                <th>Timing</th>
+                                <th>Duration</th>
+                                <th>Qty</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in prescription.items %}
+                            <tr>
+                                <td><input type="text" name="medicines[]" class="form-control"
+                                        value="{{ item.medicine }}" required></td>
+                                <td><input type="text" name="dosages[]" class="form-control" value="{{ item.dosage }}">
+                                </td>
+                                <td><input type="text" name="frequencies[]" class="form-control"
+                                        value="{{ item.frequency }}"></td>
+                                <td>
+                                    <select name="timings[]" class="form-select">
+                                        <option value="After Food" {% if item.timing=='After Food' %}selected{% endif
+                                            %}>After Food</option>
+                                        <option value="Before Food" {% if item.timing=='Before Food' %}selected{% endif
+                                            %}>Before Food</option>
+                                        <option value="With Food" {% if item.timing=='With Food' %}selected{% endif %}>
+                                            With Food</option>
+                                        <option value="Empty Stomach" {% if item.timing=='Empty Stomach' %}selected{%
+                                            endif %}>Empty Stomach</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" name="durations[]" class="form-control"
+                                        value="{{ item.duration }}"></td>
+                                <td><input type="number" name="quantities[]" class="form-control"
+                                        value="{{ item.quantity }}"></td>
+                                <td><button type="button" class="btn btn-danger btn-sm remove-row">X</button></td>
+                            </tr>
+                            {% endfor %}
+                            {% if not prescription.items.count() %}
+                            <tr>
+                                <td><input type="text" name="medicines[]" class="form-control" placeholder="Name"
+                                        required></td>
+                                <td><input type="text" name="dosages[]" class="form-control" placeholder="500mg"></td>
+                                <td><input type="text" name="frequencies[]" class="form-control" placeholder="1-0-1">
+                                </td>
+                                <td>
+                                    <select name="timings[]" class="form-select">
+                                        <option value="After Food">After Food</option>
+                                        <option value="Before Food">Before Food</option>
+                                        <option value="With Food">With Food</option>
+                                        <option value="Empty Stomach">Empty Stomach</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" name="durations[]" class="form-control" placeholder="5 days">
+                                </td>
+                                <td><input type="number" name="quantities[]" class="form-control" placeholder="10"></td>
+                                <td><button type="button" class="btn btn-danger btn-sm remove-row">X</button></td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-success btn-sm" id="add-row">Add Medicine</button>
+                </div>
+                <div class="mb-3">
+                    <label>Instructions</label>
+                    <textarea name="instructions" class="form-control" rows="3"
+                        required>{{ prescription.instructions }}</textarea>
+                </div>
+
+                <script>
+                    document.getElementById('add-row').addEventListener('click', function () {
+                        var table = document.getElementById('rx-table').getElementsByTagName('tbody')[0];
+                        var row = table.insertRow(-1);
+                        row.innerHTML = `
+                            <td><input type="text" name="medicines[]" class="form-control" required></td>
+                            <td><input type="text" name="dosages[]" class="form-control"></td>
+                            <td><input type="text" name="frequencies[]" class="form-control"></td>
+                             <td>
+                                <select name="timings[]" class="form-select">
+                                    <option value="After Food">After Food</option>
+                                    <option value="Before Food">Before Food</option>
+                                    <option value="With Food">With Food</option>
+                                    <option value="Empty Stomach">Empty Stomach</option>
+                                </select>
+                            </td>
+                            <td><input type="text" name="durations[]" class="form-control"></td>
+                            <td><input type="number" name="quantities[]" class="form-control"></td>
+                            <td><button type="button" class="btn btn-danger btn-sm remove-row">X</button></td>
+                        `;
+                        attachRemoveEvent();
+                    });
+
+                    function attachRemoveEvent() {
+                        var buttons = document.getElementsByClassName('remove-row');
+                        for (var i = 0; i < buttons.length; i++) {
+                            buttons[i].addEventListener('click', function () {
+                                if (document.querySelectorAll('#rx-table tbody tr').length > 1) {
+                                    this.closest('tr').remove();
+                                }
+                            });
+                        }
+                    }
+                    attachRemoveEvent();
+                </script>
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('doctor.appointment_details', id=prescription.appointment_id) }}"
+                        class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update Prescription</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
