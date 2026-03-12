@@ -6,3 +6,4 @@ flask-wtf
 email_validator
 requests
 authlib
+gunicorn

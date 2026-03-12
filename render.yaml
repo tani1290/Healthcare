@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: hospital-management
+    runtime: python
+    buildCommand: bash build.sh
+    startCommand: gunicorn run:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.11.0"
