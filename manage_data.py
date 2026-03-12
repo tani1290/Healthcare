@@ -11,6 +11,7 @@ app = create_app()
 @app.cli.command("init-roles")
 def init_roles_command():
     """Initialize base users (Admin, Doctor, Pharmacy)."""
+    db.create_all()
     # 1. Pharmacy
     if not User.query.filter_by(username='pharmacy').first():
         u = User(username='pharmacy', email='pharmacy@hospital.com', role='medical')
@@ -45,6 +46,7 @@ def init_roles_command():
 @app.cli.command("seed-inventory")
 def seed_inventory_command():
     """Populate pharmacy inventory."""
+    db.create_all()
     medicines = [
         {"name": "Cough Syrup", "price": 50.0, "stock": 50},
         {"name": "MultiVitamin", "price": 10.0, "stock": 100},
