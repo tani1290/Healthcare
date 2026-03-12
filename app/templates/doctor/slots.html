@@ -12,6 +12,7 @@
                         <p class="text-muted small">Automatically create slots for a date based on your working hours.
                         </p>
                         <form method="post" action="{{ url_for('doctor.generate_slots') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <div class="mb-3">
                                 <label>Target Date</label>
                                 <input type="date" name="date" class="form-control" required min="{{ min_date }}">
@@ -55,6 +56,7 @@
                             <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#manualSlot">
                                 <div class="accordion-body">
                                     <form method="post" action="{{ url_for('doctor.manage_slots') }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                         <div class="mb-3">
                                             <label>Start Time</label>
                                             <input type="datetime-local" name="start_time" class="form-control"

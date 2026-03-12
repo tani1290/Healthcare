@@ -6,6 +6,7 @@
         <div class="card p-4">
             <h2>Edit Slot</h2>
             <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="mb-3">
                     <label>Date & Start Time</label>
                     <input type="datetime-local" name="start_time" class="form-control"

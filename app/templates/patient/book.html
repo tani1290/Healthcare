@@ -11,6 +11,7 @@
             {% if slots %}
             <h5>Select a Time Slot</h5>
             <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="list-group mb-3">
                     {% for slot in slots %}
                     <label class="list-group-item d-flex gap-2">

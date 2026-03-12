@@ -11,6 +11,7 @@
         <div class="card p-4 mb-4">
             <h5>Add New Stock</h5>
             <form action="{{ url_for('medical.inventory') }}" method="POST" class="row g-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="col-md-3">
                     <label class="form-label">Medicine Name</label>
                     <input type="text" name="name" class="form-control" required placeholder="e.g. Paracetamol">

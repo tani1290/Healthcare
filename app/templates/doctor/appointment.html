@@ -65,6 +65,7 @@
             {% else %}
             <h4>Write Prescription</h4>
             <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="mb-3">
                     <label class="form-label">Medicines</label>
                     <table class="table table-bordered" id="rx-table">
