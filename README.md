@@ -2,9 +2,9 @@
 
 A comprehensive, full-stack web application for managing healthcare services, bridging the gap between Patients, Doctors, and Pharmacy services. Built with **Flask**, **SQLAlchemy**, and **Bootstrap 5**.
 
-## 🚀 Features
+## Features
 
-### 👤 Patient Portal
+### Patient Portal
 - **Dashboard**: View upcoming appointments, medicine reminders, and health stats.
 - **Find Doctors**: Search doctors by specialty and location.
 - **Appointments**: Book, view, and manage appointments.
@@ -17,7 +17,7 @@ A comprehensive, full-stack web application for managing healthcare services, br
 - **Medical History**: Access complete medical records and logs.
 - **Profile**: Manage personal details, allergies, and medical conditions.
 
-### 💊 Pharmacy / Medical Dashboard
+###  Pharmacy / Medical Dashboard
 - **Order Management**: View new, active, and completed medicine orders.
 - **Inventory System**: Manage medicine stock, prices, and expiry dates.
 - **Dispatch System**: 
@@ -25,11 +25,11 @@ A comprehensive, full-stack web application for managing healthcare services, br
     - **Smart Routing**: View patient location on a map.
     - **Share Route**: Copy route links or share directly via **WhatsApp** to delivery agents.
 
-### 👨‍⚕️ Doctor Portal
+### Doctor Portal
 - **Dashboard**: Manage daily appointments and patient queues.
 - **Consultation**: Digital prescriptions and patient history review.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 - **Backend**: Python, Flask, Flask-Login, Flask-SQLAlchemy.
 - **Database**: SQLite.
 - **Frontend**: HTML5, CSS3, Bootstrap 5, JavaScript.
@@ -72,7 +72,7 @@ A comprehensive, full-stack web application for managing healthcare services, br
    flask run
    ```
 
-## 🔑 Default Credentials (Mock Data)
+## Default Credentials (Mock Data)
 
 After running `flask seed-db`, the following users are available:
 
@@ -99,12 +99,7 @@ After running `flask seed-db`, the following users are available:
 4. Click **Dispatch**, assign an agent (e.g., "Rahul"), and set an ETA (e.g., "20 mins").
 5. Share the route via WhatsApp if needed.
 
-## 🤝 Contributing
-1. Fork the repo.
-2. Create a feature branch (`git checkout -b feature/NewFeature`).
-3. Commit changes (`git commit -m 'Add NewFeature'`).
-4. Push to branch (`git push origin feature/NewFeature`).
-5. Open a Pull Request.
+
 
 ---
-*Built with ❤️ for better healthcare.*
+*Built with passion for better healthcare.*
