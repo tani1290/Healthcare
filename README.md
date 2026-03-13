@@ -36,7 +36,7 @@ A comprehensive, full-stack web application for managing healthcare services, br
 - **Maps**: Leaflet.js, OpenStreetMap.
 - **Payment**: Mock Payment Gateway (Supports Credit Card & **Cash on Delivery**).
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 1. **Clone the repository**
    ```bash
