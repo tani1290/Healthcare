@@ -1,4 +1,4 @@
-# 🏥 National Healthcare System
+#  Healthcare System
 
 A comprehensive, full-stack web application for managing healthcare services, bridging the gap between Patients, Doctors, and Pharmacy services. Built with **Flask**, **SQLAlchemy**, and **Bootstrap 5**.
 
@@ -82,7 +82,7 @@ After running `flask seed-db`, the following users are available:
 | **Doctor** | `doctor@test.com` | `password` |
 | **Medical** | `medical@test.com` | `password` |
 
-## 📱 Usage Guide
+##  Usage Guide
 
 ### Ordering Medicines
 1. Go to **My Prescriptions**.
